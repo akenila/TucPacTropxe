@@ -81,6 +81,7 @@ def search_and_open_project(project_name):
 def export_project():
     """Click on export button and wait for export to complete"""
     print("Starting export process...")
+    time.sleep(2)  # Small pause before export
     
     # Click on export icon
     try:
@@ -90,6 +91,7 @@ def export_project():
         print("Could not find export icon")
         return False
     time.sleep(2)  # Wait for export window to open
+    print("Starting export...")
     
     
     screen_width, screen_height = pyautogui.size()
