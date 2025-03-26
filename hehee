@@ -20,7 +20,7 @@ def open_capcut():
             
         else:
             # Capcut is not running, launch it
-            capcut_path = os.getenv("LOCALAPPDATA") + r"\Capcut\Apps\Capcut.exe"    
+            capcut_path = os.getenv("LOCALAPPDATA") + r"\CapCut\Apps\CapCut.exe"    
             subprocess.Popen(capcut_path)
             print("Opening Capcut...")
             while True:
