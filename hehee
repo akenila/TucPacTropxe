@@ -75,7 +75,7 @@ def search_and_open_project(project_name):
     
     # Click on search icon
     try:
-        search_img = pyautogui.locateCenterOnScreen('search.png', confidence=0.7)
+        search_img = pyautogui.locateCenterOnScreen('assets/search.png', confidence=0.7)
         pyautogui.click(search_img)
     except Exception:
         screen_width, screen_height = pyautogui.size()
@@ -102,7 +102,7 @@ def export_project():
     
     # Click on export icon
     try:
-        export = pyautogui.locateCenterOnScreen('export.png', confidence=0.7)
+        export = pyautogui.locateCenterOnScreen('assets/export.png', confidence=0.7)
         pyautogui.click(export)
     except Exception:
         print("Could not find export icon")
@@ -117,7 +117,7 @@ def export_project():
     
     while True:
         try:
-            export = pyautogui.locateCenterOnScreen('export_success.png', confidence=0.7)
+            export = pyautogui.locateCenterOnScreen('assets/export_success.png', confidence=0.7)
             time.sleep(5)  # Wait for export to complete
             break
         except Exception:
@@ -135,7 +135,7 @@ def close_project():
     
     # Click on back/close button
     try:
-        close = pyautogui.locateCenterOnScreen('menu.png', confidence=0.7)
+        close = pyautogui.locateCenterOnScreen('assets/menu.png', confidence=0.7)
         pyautogui.click(close)
     except Exception:
         print("Could not find close icon")
@@ -143,7 +143,7 @@ def close_project():
     
     time.sleep(2)  # Wait for close confirmation
     try:
-        close = pyautogui.locateCenterOnScreen('back_home.png', confidence=0.7)
+        close = pyautogui.locateCenterOnScreen('assets/back_home.png', confidence=0.7)
         pyautogui.click(close)
     except Exception:
         print("Could not find close icon")
