@@ -1,0 +1,229 @@
+def open_capcut():
+    try:
+        # Check if Capcut is already running
+        capcut_windows = gw.getWindowsWithTitle("CapCut")
+        
+        if capcut_windows:
+            # Capcut is already running
+            capcut_window = capcut_windows[0]
+            
+            # Check if window is minimized
+            if capcut_window.isMinimized:
+                print("Restoring minimized Capcut window...")
+                capcut_window.restore()
+            
+            # Activate and focus on the window
+            capcut_window.activate()
+            time.sleep(2)  # Wait for window to become active
+            capcut_window.maximize()
+            print("Capcut window activated")
+            
+        else:
+            # Capcut is not running, launch it
+            capcut_path = os.getenv("LOCALAPPDATA") + r"\Capcut\Apps\Capcut.exe"    
+            subprocess.Popen(capcut_path)
+            print("Opening Capcut...")
+            while True:
+                try:
+                    capcut_windows = gw.getWindowsWithTitle("CapCut")
+                    if capcut_windows:
+                        break
+                    time.sleep(1)
+                except:
+                    pass
+            capcut_window = gw.getWindowsWithTitle("CapCut")[0]
+            capcut_window.activate()
+            capcut_window.maximize()
+
+            time.sleep(5)  # Wait for Capcut to open
+        
+        return True
+        
+    except Exception as e:
+        print(f"Error with Capcut: {e}")
+        return False
+
+def launch_capcut(capcut_path=None):
+    """Launch CapCut application"""
+    print("Launching CapCut...")
+    
+    if capcut_path and os.path.exists(capcut_path):
+        # Launch using direct path
+        try:
+            subprocess.Popen(capcut_path)
+            print(f"Launched CapCut from path: {capcut_path}")
+            capcut = gw.getWindowsWithTitle("CapCut")[0]
+            capcut.activate()
+            capcut.maximize()
+            time.sleep(5)  # Wait for CapCut to open
+            return True
+        except Exception as e:
+            print(f"Error launching CapCut from path: {e}")
+            # Fall back to Windows search method
+    
+    # Windows search method (fallback)
+    pyautogui.press('win')
+    time.sleep(1)
+    pyautogui.write('CapCut')
+    time.sleep(1)
+    pyautogui.press('enter')
+    time.sleep(5)  # Wait for CapCut to open
+
+def search_and_open_project(project_name):
+    """Search for a project by name and open it"""
+    print(f"Searching for project: {project_name}")
+    
+    # Click on search icon
+    try:
+        search_img = pyautogui.locateCenterOnScreen('search.png', confidence=0.7)
+        pyautogui.click(search_img)
+    except Exception:
+        screen_width, screen_height = pyautogui.size()
+        project = pyautogui.click(screen_width * 0.87, screen_height * 0.23)
+    
+    # Type project name
+    time.sleep(1)
+    pyautogui.hotkey('ctrl', 'a')  # Select all (clear any existing text)
+    pyautogui.press('delete')
+    pyautogui.write(project_name)
+    time.sleep(2)
+    
+    # Click on the project to open it
+    screen_width, screen_height = pyautogui.size()
+    project = pyautogui.click(screen_width * 0.15, screen_height * 0.3)
+    
+    print(f"Project opened: {project_name}")
+    time.sleep(3)  # Wait for project to open
+    return True
+
+def export_project():
+    """Click on export button and wait for export to complete"""
+    print("Starting export process...")
+    
+    # Click on export icon
+    try:
+        export = pyautogui.locateCenterOnScreen('export.png', confidence=0.7)
+        pyautogui.click(export)
+    except Exception:
+        print("Could not find export icon")
+        return False
+    time.sleep(2)  # Wait for export window to open
+    
+    
+    screen_width, screen_height = pyautogui.size()
+    project = pyautogui.click(screen_width * 0.6, screen_height * 0.76)
+    time.sleep(2)  # Wait for export window to open
+    print("Export started")
+    
+    while True:
+        try:
+            export = pyautogui.locateCenterOnScreen('export_success.png', confidence=0.7)
+            time.sleep(5)  # Wait for export to complete
+            break
+        except Exception:
+            pass
+    screen_width, screen_height = pyautogui.size()
+    cancel = pyautogui.click(screen_width * 0.65, screen_height * 0.76)
+    time.sleep(2)  # Small pause after export
+    print("Export completed")
+    return True
+
+
+def close_project():
+    """Close the current project"""
+    print("Closing project...")
+    
+    # Click on back/close button
+    try:
+        close = pyautogui.locateCenterOnScreen('menu.png', confidence=0.7)
+        pyautogui.click(close)
+    except Exception:
+        print("Could not find close icon")
+        return False
+    
+    time.sleep(2)  # Wait for close confirmation
+    try:
+        close = pyautogui.locateCenterOnScreen('back_home.png', confidence=0.7)
+        pyautogui.click(close)
+    except Exception:
+        print("Could not find close icon")
+        return
+    
+    time.sleep(2)  # Wait for project to close
+    print("Project closed")
+    return True
+
+def process_projects(project_list, capcut_path=None):
+    """Process a list of projects one by one"""
+    open_capcut()
+    time.sleep(5)  # Wait for CapCut to be fully loaded
+    
+    for i, project_name in enumerate(project_list):
+        print(f"\n[{i+1}/{len(project_list)}] Processing project: {project_name}")
+        
+        if not search_and_open_project(project_name):
+            print(f"Failed to open project: {project_name}, skipping to next")
+            continue
+        
+        if not export_project():
+            print(f"Failed to export project: {project_name}")
+        
+        if not close_project():
+            print(f"Failed to close project: {project_name}")
+            # Emergency close attempt
+            pyautogui.hotkey('alt', 'f4')
+            time.sleep(2)
+        
+        print(f"Completed processing project: {project_name}")
+        time.sleep(2)  # Small pause between projects
+
+if __name__ == "__main__":
+    capcut_path = r"C:\Program Files\CapCut\CapCut.exe"
+    capcut_path = os.getenv("LOCALAPPDATA") + r"\CapCut"
+    projects_path = capcut_path + r"\User Data\Projects\com.lveditor.draft"
+    
+    # Lấy tất cả tên dự án hợp lệ
+    all_projects = [p for p in os.listdir(projects_path) if p not in ['.recycle_bin', 'root_meta_info.json']]
+    
+    # Tìm các dự án cần đổi tên do xung đột prefix
+    projects_to_rename = []  # Lưu danh sách các dự án cần đổi tên (là prefix của dự án khác)
+    
+    # Sắp xếp dự án theo độ dài (ngắn đến dài) để kiểm tra prefix
+    sorted_projects = sorted(all_projects, key=len)
+    
+    # Kiểm tra xem có dự án nào là prefix của dự án khác không
+    for i, proj1 in enumerate(sorted_projects):
+        for proj2 in sorted_projects[i+1:]:
+            # Kiểm tra nếu proj1 là prefix của proj2 (không phân biệt hoa thường)
+            if proj2.lower().startswith(proj1.lower()):
+                projects_to_rename.append(proj1)
+                break
+    
+    # In thông tin về các dự án cần đổi tên
+    if projects_to_rename:
+        print(f"Cần đổi tên {len(projects_to_rename)} dự án để đảm bảo tìm kiếm duy nhất:")
+        for proj in projects_to_rename:
+            print(f"  - {proj}")
+        
+        # Thực hiện đổi tên chỉ các dự án có xung đột
+        projects = []
+        for p in all_projects:
+            if p in projects_to_rename:
+                # Thêm timestamp cho các dự án có xung đột
+                timestamp = int(time.time())
+                new_name = f"{p}_{timestamp}"
+                os.rename(os.path.join(projects_path, p), os.path.join(projects_path, new_name))
+                projects.append(new_name)
+                print(f"Đã đổi tên: {p} -> {new_name}")
+            else:
+                # Giữ nguyên tên các dự án không có xung đột
+                projects.append(p)
+    else:
+        print("Tất cả dự án đã đảm bảo tìm kiếm duy nhất, không cần đổi tên.")
+        projects = all_projects
+    
+    # Start processing
+    print(f"Sẵn sàng xử lý {len(projects)} dự án")
+    input("Nhấn Enter để bắt đầu...")
+    process_projects(projects, capcut_path)
+    print("Đã xử lý xong tất cả dự án!")
