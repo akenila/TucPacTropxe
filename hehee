@@ -1,41 +1,23 @@
 def open_capcut():
     try:
         # Check if Capcut is already running
-        capcut_windows = gw.getWindowsWithTitle("CapCut")
-        
-        if capcut_windows:
-            # Capcut is already running
-            capcut_window = capcut_windows[0]
-            
-            # Check if window is minimized
-            if capcut_window.isMinimized:
-                print("Restoring minimized Capcut window...")
-                capcut_window.restore()
-            
-            # Activate and focus on the window
-            capcut_window.activate()
-            time.sleep(2)  # Wait for window to become active
-            capcut_window.maximize()
-            print("Capcut window activated")
-            
-        else:
-            # Capcut is not running, launch it
-            capcut_path = os.getenv("LOCALAPPDATA") + r"\CapCut\Apps\CapCut.exe"    
-            subprocess.Popen(capcut_path)
-            print("Opening Capcut...")
-            while True:
-                try:
-                    capcut_windows = gw.getWindowsWithTitle("CapCut")
-                    if capcut_windows:
-                        break
-                    time.sleep(1)
-                except:
-                    pass
-            capcut_window = gw.getWindowsWithTitle("CapCut")[0]
-            capcut_window.activate()
-            capcut_window.maximize()
+        # Capcut is not running, launch it
+        capcut_path = os.getenv("LOCALAPPDATA") + r"\CapCut\Apps\CapCut.exe"    
+        subprocess.Popen(capcut_path)
+        print("Opening Capcut...")
+        while True:
+            try:
+                capcut_windows = gw.getWindowsWithTitle("CapCut")
+                if capcut_windows:
+                    break
+                time.sleep(1)
+            except:
+                pass
+        capcut_window = gw.getWindowsWithTitle("CapCut")[0]
+        capcut_window.activate()
+        capcut_window.maximize()
 
-            time.sleep(5)  # Wait for Capcut to open
+        time.sleep(5)  # Wait for Capcut to open
         
         return True
         
