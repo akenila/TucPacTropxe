@@ -267,10 +267,6 @@ def on_canvas_configure(event):
     """Resize the inner frame when the canvas changes size"""
     canvas.itemconfig(canvas_frame, width=event.width)
 
-def on_mousewheel(event):
-    """Handle mousewheel scrolling"""
-    canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-
 def start_processing():
     """Start processing selected projects"""
     selected_projects = [project for project, var in project_vars if var.get()]
@@ -303,6 +299,25 @@ def start_processing():
             root.after(0, lambda: load_btn.config(state=tk.NORMAL))
     
     threading.Thread(target=process_thread, daemon=True).start()
+
+def on_mousewheel(event):
+    """Handle mousewheel scrolling with proper boundary checks"""
+    # Get current scroll position
+    current_pos = canvas.yview()
+    
+    # Calculate scroll direction (positive = down, negative = up)
+    direction = -1 * (event.delta/120)
+    
+    # Check boundaries before scrolling
+    if direction < 0 and current_pos[0] <= 0:
+        # Already at top - don't scroll up further
+        return
+    elif direction > 0 and current_pos[1] >= 1.0:
+        # Already at bottom - don't scroll down further
+        return
+        
+    # Perform the scroll if we're not at boundaries
+    canvas.yview_scroll(int(direction), "units")
 
 if __name__ == "__main__":
     # Create the main window
@@ -345,6 +360,7 @@ if __name__ == "__main__":
     canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     
     # Inner frame for projects (will be placed on canvas)
+        # Inner frame for projects (will be placed on canvas)
     project_frame = ttk.Frame(canvas)
     canvas_frame = canvas.create_window((0, 0), window=project_frame, anchor=tk.NW)
     
@@ -352,9 +368,8 @@ if __name__ == "__main__":
     project_frame.bind("<Configure>", on_frame_configure)
     canvas.bind("<Configure>", on_canvas_configure)
     
-    # Bind mousewheel for scrolling
-    canvas.bind_all("<MouseWheel>", on_mousewheel)
-    
+    canvas.bind("<Enter>", lambda e: canvas.bind_all("<MouseWheel>", on_mousewheel))
+    canvas.bind("<Leave>", lambda e: canvas.unbind_all("<MouseWheel>"))
     # Log output frame with label
     ttk.Label(main_frame, text="Log:").pack(anchor=tk.W, pady=(10,5))
     
