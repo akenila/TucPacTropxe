@@ -67,7 +67,8 @@ def search_and_open_project(project_name):
     time.sleep(1)
     pyautogui.hotkey('ctrl', 'a')  # Select all (clear any existing text)
     pyautogui.press('delete')
-    pyautogui.write(project_name)
+    pyperclip.copy(project_name)
+    pyautogui.hotkey('ctrl', 'v')  # Paste project name
     time.sleep(2)
     
     # Click on the project to open it
@@ -161,14 +162,18 @@ def process_projects(project_list, capcut_path=None):
         print(f"Completed processing project: {project_name}")
         time.sleep(2)  # Small pause between projects
 
-if __name__ == "__main__":
-    capcut_path = r"C:\Program Files\CapCut\CapCut.exe"
+def get_projects_from_path():
+    """Get projects from the CapCut directory"""
     capcut_path = os.getenv("LOCALAPPDATA") + r"\CapCut"
     projects_path = capcut_path + r"\User Data\Projects\com.lveditor.draft"
     
-    # Lấy tất cả tên dự án hợp lệ
-    all_projects = [p for p in os.listdir(projects_path) if p not in ['.recycle_bin', 'root_meta_info.json']]
+    if not os.path.exists(projects_path):
+        print(f"Error: Projects path not found at {projects_path}")
+        return []
     
+    # Get valid projects
+    all_projects = [p for p in os.listdir(projects_path) 
+                    if p not in ['.recycle_bin', 'root_meta_info.json']]
     # Tìm các dự án cần đổi tên do xung đột prefix
     projects_to_rename = []  # Lưu danh sách các dự án cần đổi tên (là prefix của dự án khác)
     
@@ -205,9 +210,161 @@ if __name__ == "__main__":
     else:
         print("Tất cả dự án đã đảm bảo tìm kiếm duy nhất, không cần đổi tên.")
         projects = all_projects
+    return all_projects, projects_path
+
+# Redirect stdout to the log window
+def redirect_stdout_to_widget(widget):
+    class StdoutRedirector:
+        def __init__(self, text_widget):
+            self.text_widget = text_widget
+            self.buffer = ""
+        
+        def write(self, string):
+            self.buffer += string
+            self.text_widget.config(state=tk.NORMAL)
+            self.text_widget.insert(tk.END, string)
+            self.text_widget.see(tk.END)
+            self.text_widget.config(state=tk.DISABLED)
+            
+        def flush(self):
+            pass
     
-    # Start processing
-    print(f"Sẵn sàng xử lý {len(projects)} dự án")
-    input("Nhấn Enter để bắt đầu...")
-    process_projects(projects, capcut_path)
-    print("Đã xử lý xong tất cả dự án!")
+    return StdoutRedirector(widget)
+
+# GUI Functions
+def load_projects():
+    """Load projects and display them in the project frame"""
+    # Clear existing projects
+    for widget in project_frame.winfo_children():
+        widget.destroy()
+        
+    project_vars.clear()
+    
+    # Get projects
+    all_projects, _ = get_projects_from_path()
+    
+    if not all_projects:
+        print("No projects found.")
+        return
+    
+    # Add checkboxes for each project
+    for i, project in enumerate(all_projects):
+        var = tk.BooleanVar(value=False)
+        project_vars.append((project, var))
+        
+        chk = ttk.Checkbutton(project_frame, text=project, variable=var)
+        chk.grid(row=i, column=0, sticky=tk.W, padx=5, pady=2)
+    
+    # Enable start button
+    start_btn.config(state=tk.NORMAL)
+    print(f"Loaded {len(all_projects)} projects.")
+
+def on_frame_configure(event):
+    """Update the scrollregion when the inner frame changes size"""
+    canvas.configure(scrollregion=canvas.bbox("all"))
+
+def on_canvas_configure(event):
+    """Resize the inner frame when the canvas changes size"""
+    canvas.itemconfig(canvas_frame, width=event.width)
+
+def on_mousewheel(event):
+    """Handle mousewheel scrolling"""
+    canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+def start_processing():
+    """Start processing selected projects"""
+    selected_projects = [project for project, var in project_vars if var.get()]
+    
+    if not selected_projects:
+        print("No projects selected.")
+        return
+    
+    print(f"Starting to process {len(selected_projects)} projects...")
+    start_btn.config(state=tk.DISABLED)
+    load_btn.config(state=tk.DISABLED)
+    
+    # Start processing in a separate thread
+    def process_thread():
+        try:
+            capcut_path = os.getenv("LOCALAPPDATA") + r"\CapCut"
+            process_projects(selected_projects, capcut_path)
+            print("Processing complete.")
+            try:
+                capcut_windows = gw.getWindowsWithTitle("CapCut")
+                for window in capcut_windows:
+                    window.close()
+            except:
+                pass
+        except Exception as e:
+            print(f"Error during processing: {str(e)}")
+        finally:
+            # Re-enable buttons when done
+            root.after(0, lambda: start_btn.config(state=tk.NORMAL))
+            root.after(0, lambda: load_btn.config(state=tk.NORMAL))
+    
+    threading.Thread(target=process_thread, daemon=True).start()
+
+if __name__ == "__main__":
+    # Create the main window
+    root = tk.Tk()
+    root.title("Project Exporter")
+    root.geometry("800x600")
+    
+    # Main frame
+    main_frame = ttk.Frame(root, padding="10")
+    main_frame.pack(fill=tk.BOTH, expand=True)
+    
+    # Button frame
+    btn_frame = ttk.Frame(main_frame)
+    btn_frame.pack(fill=tk.X, pady=5)
+    
+    # Store project variables
+    project_vars = []
+    
+    # Load Projects button
+    load_btn = ttk.Button(btn_frame, text="Load Projects", command=load_projects)
+    load_btn.pack(side=tk.LEFT, padx=5)
+    
+    # Start button (disabled initially)
+    start_btn = ttk.Button(btn_frame, text="Start", command=start_processing, state=tk.DISABLED)
+    start_btn.pack(side=tk.LEFT, padx=5)
+    
+    # Project selection frame with label
+    ttk.Label(main_frame, text="Select Projects to Export:").pack(anchor=tk.W, pady=(10,5))
+    
+    # Create a frame for the projects list with scrollbar
+    project_frame_outer = ttk.Frame(main_frame, borderwidth=1, relief=tk.SUNKEN)
+    project_frame_outer.pack(fill=tk.BOTH, expand=True, pady=5)
+    
+    # Add canvas and scrollbar for scrolling
+    canvas = tk.Canvas(project_frame_outer)
+    scrollbar = ttk.Scrollbar(project_frame_outer, orient=tk.VERTICAL, command=canvas.yview)
+    canvas.configure(yscrollcommand=scrollbar.set)
+    
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    
+    # Inner frame for projects (will be placed on canvas)
+    project_frame = ttk.Frame(canvas)
+    canvas_frame = canvas.create_window((0, 0), window=project_frame, anchor=tk.NW)
+    
+    # Configure canvas to resize with frame
+    project_frame.bind("<Configure>", on_frame_configure)
+    canvas.bind("<Configure>", on_canvas_configure)
+    
+    # Bind mousewheel for scrolling
+    canvas.bind_all("<MouseWheel>", on_mousewheel)
+    
+    # Log output frame with label
+    ttk.Label(main_frame, text="Log:").pack(anchor=tk.W, pady=(10,5))
+    
+    # Read-only log text area
+    log_text = scrolledtext.ScrolledText(main_frame, wrap=tk.WORD, height=10)
+    log_text.pack(fill=tk.BOTH, expand=True, pady=5)
+    log_text.config(state=tk.DISABLED)
+    
+    # Redirect stdout to log window
+    sys.stdout = redirect_stdout_to_widget(log_text)
+    
+    # Start the GUI
+    root.mainloop()
