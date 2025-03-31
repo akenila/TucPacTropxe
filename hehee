@@ -132,7 +132,7 @@ def export_project():
             else:
                 break
         except:
-            continue
+            break
     print("Export started")
     time.sleep(2)  # Wait for export to start
     while True:
@@ -146,8 +146,10 @@ def export_project():
                 # Click vào vị trí mới
                 pyautogui.click(new_x, new_y)
                 break
+            print(f"Error locating or clicking on image")
             time.sleep(2)  # Wait for export to complete
         except Exception as e:
+            print(f"Error locating or clicking on image: {e}")
             pass
             time.sleep(2)
     time.sleep(2)  # Small pause after export
