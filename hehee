@@ -1,3 +1,4 @@
+# Original functions
 def open_capcut():
     try:
         # Check if Capcut is already running
@@ -53,15 +54,27 @@ def launch_capcut(capcut_path=None):
 
 def click_by_ratio(x_ratio, y_ratio):
     """
-    Click vào vị trí dựa trên tỷ lệ phần trăm của màn hình.
+    Click vào vị trí dựa trên tỷ lệ phần trăm của màn hình, điều chỉnh cho các tỷ lệ khác nhau.
     :param x_ratio: Tỷ lệ phần trăm theo chiều ngang (0.0 - 1.0)
     :param y_ratio: Tỷ lệ phần trăm theo chiều dọc (0.0 - 1.0)
     """
     screen_width, screen_height = pyautogui.size()
-    x = int(screen_width * x_ratio)
-    y = int(screen_height * y_ratio)
-    pyautogui.click(x, y)
+    current_ratio = screen_width / screen_height  # Tính tỷ lệ màn hình hiện tại
 
+    # Tỷ lệ chuẩn 16:9
+    standard_ratio = 16 / 9
+
+    if abs(current_ratio - standard_ratio) < 0.01:  # Nếu tỷ lệ gần đúng 16:9
+        # Giữ nguyên vị trí
+        x = int(screen_width * x_ratio)
+        y = int(screen_height * y_ratio)
+    else:
+        # Điều chỉnh vị trí dựa trên tỷ lệ thực tế
+        adjusted_x_ratio = x_ratio * (current_ratio / standard_ratio)
+        x = int(screen_width * adjusted_x_ratio)
+        y = int(screen_height * y_ratio)
+
+    pyautogui.click(x, y)
 def search_and_open_project(project_name):
     """Search for a project by name and open it"""
     print(f"Searching for project: {project_name}")
