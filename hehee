@@ -1,3 +1,4 @@
+# Original functions
 def open_capcut():
     try:
         # Check if Capcut is already running
@@ -125,7 +126,7 @@ def export_project():
             new_x = center.x+450
             new_y = center.y
             # Click vào vị trí mới
-            pyautogui.moveTo(new_x, new_y)
+            pyautogui.click(new_x, new_y)
     except Exception as e:
         pass
     time.sleep(2)  # Wait for export window to open
