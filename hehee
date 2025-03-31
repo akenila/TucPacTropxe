@@ -81,7 +81,6 @@ def search_and_open_project(project_name):
             new_y = center.y + 50
             # Click vào vị trí mới
             pyautogui.click(new_x, new_y)
-            print(f"Clicked at offset position: ({new_x}, {new_y})")
     except Exception as e:
         print(f"Error locating or clicking on image: {e}")
     
@@ -113,7 +112,7 @@ def export_project():
                 continue
         except Exception:
             print("Could not find export icon")
-            return False
+            continue
     print("Starting export...")
     
     
