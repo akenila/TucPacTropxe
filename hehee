@@ -51,6 +51,17 @@ def launch_capcut(capcut_path=None):
     pyautogui.press('enter')
     time.sleep(5)  # Wait for CapCut to open
 
+def click_by_ratio(x_ratio, y_ratio):
+    """
+    Click vào vị trí dựa trên tỷ lệ phần trăm của màn hình.
+    :param x_ratio: Tỷ lệ phần trăm theo chiều ngang (0.0 - 1.0)
+    :param y_ratio: Tỷ lệ phần trăm theo chiều dọc (0.0 - 1.0)
+    """
+    screen_width, screen_height = pyautogui.size()
+    x = int(screen_width * x_ratio)
+    y = int(screen_height * y_ratio)
+    pyautogui.click(x, y)
+
 def search_and_open_project(project_name):
     """Search for a project by name and open it"""
     print(f"Searching for project: {project_name}")
@@ -73,7 +84,7 @@ def search_and_open_project(project_name):
     
     # Click on the project to open it
     screen_width, screen_height = pyautogui.size()
-    project = pyautogui.click(screen_width * 0.15, screen_height * 0.3)
+    click_by_ratio(0.15, 0.3)  # Click on the project (assumed to be in the center)  
     
     print(f"Project opened: {project_name}")
     time.sleep(3)  # Wait for project to open
