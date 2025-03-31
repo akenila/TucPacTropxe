@@ -99,13 +99,21 @@ def export_project():
     time.sleep(2)  # Small pause before export
     
     # Click on export icon
-    try:
-        export = pyautogui.locateCenterOnScreen('assets/export.png', confidence=0.7)
-        pyautogui.click(export)
-    except Exception:
-        print("Could not find export icon")
-        return False
-    time.sleep(2)  # Wait for export window to open
+    while True:
+        try:
+            export = pyautogui.locateCenterOnScreen('assets/export.png', confidence=0.7)
+            pyautogui.click(export)
+            try:
+                if pyautogui.locateCenterOnScreen('assets/duration.png', confidence=0.7):
+                    time.sleep(2)  # Wait for export window to open
+                    break
+                else:
+                    continue
+            except:
+                continue
+        except Exception:
+            print("Could not find export icon")
+            return False
     print("Starting export...")
     
     
