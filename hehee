@@ -134,16 +134,22 @@ def export_project():
         except:
             continue
     print("Export started")
-    
+    time.sleep(2)  # Wait for export to start
     while True:
         try:
-            export = pyautogui.locateCenterOnScreen('assets/export_success.png', confidence=0.7)
-            time.sleep(5)  # Wait for export to complete
-            break
-        except Exception:
+            # Tìm vị trí trung tâm của ảnh
+            center = pyautogui.locateCenterOnScreen('assets/open_folder.png', confidence=0.7)
+            if center:
+                # Tính toán vị trí mới
+                new_x = center.x+530
+                new_y = center.y
+                # Click vào vị trí mới
+                pyautogui.click(new_x, new_y)
+                break
+            time.sleep(2)  # Wait for export to complete
+        except Exception as e:
             pass
-    screen_width, screen_height = pyautogui.size()
-    cancel = pyautogui.click(screen_width * 0.65, screen_height * 0.76)
+            time.sleep(2)
     time.sleep(2)  # Small pause after export
     print("Export completed")
     return True
