@@ -1,4 +1,3 @@
-# Original functions
 def open_capcut():
     try:
         # Check if Capcut is already running
@@ -51,30 +50,6 @@ def launch_capcut(capcut_path=None):
     time.sleep(1)
     pyautogui.press('enter')
     time.sleep(5)  # Wait for CapCut to open
-
-def click_by_ratio(x_ratio, y_ratio):
-    """
-    Click vào vị trí dựa trên tỷ lệ phần trăm của màn hình, điều chỉnh cho các tỷ lệ khác nhau.
-    :param x_ratio: Tỷ lệ phần trăm theo chiều ngang (0.0 - 1.0)
-    :param y_ratio: Tỷ lệ phần trăm theo chiều dọc (0.0 - 1.0)
-    """
-    screen_width, screen_height = pyautogui.size()
-    current_ratio = screen_width / screen_height  # Tính tỷ lệ màn hình hiện tại
-
-    # Tỷ lệ chuẩn 16:9
-    standard_ratio = 16 / 9
-
-    if abs(current_ratio - standard_ratio) < 0.01:  # Nếu tỷ lệ gần đúng 16:9
-        # Giữ nguyên vị trí
-        x = int(screen_width * x_ratio)
-        y = int(screen_height * y_ratio)
-    else:
-        # Điều chỉnh vị trí dựa trên tỷ lệ thực tế
-        adjusted_x_ratio = x_ratio * (current_ratio / standard_ratio)
-        x = int(screen_width * adjusted_x_ratio)
-        y = int(screen_height * y_ratio)
-
-    pyautogui.click(x, y)
 def search_and_open_project(project_name):
     """Search for a project by name and open it"""
     print(f"Searching for project: {project_name}")
@@ -97,7 +72,18 @@ def search_and_open_project(project_name):
     
     # Click on the project to open it
     screen_width, screen_height = pyautogui.size()
-    click_by_ratio(0.15, 0.3)  # Click on the project (assumed to be in the center)  
+    try:
+        # Tìm vị trí trung tâm của ảnh
+        center = pyautogui.locateCenterOnScreen('assets/project.png', confidence=0.7)
+        if center:
+            # Tính toán vị trí mới
+            new_x = center.x
+            new_y = center.y + 50
+            # Click vào vị trí mới
+            pyautogui.click(new_x, new_y)
+            print(f"Clicked at offset position: ({new_x}, {new_y})")
+    except Exception as e:
+        print(f"Error locating or clicking on image: {e}")
     
     print(f"Project opened: {project_name}")
     time.sleep(3)  # Wait for project to open
