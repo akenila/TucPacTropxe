@@ -78,7 +78,6 @@ def search_and_open_project(project_name):
     # Type project name
     time.sleep(1)
     pyautogui.hotkey('ctrl', 'a')  # Select all (clear any existing text)
-    pyautogui.press('delete')
     pyperclip.copy(project_name)
     pyautogui.hotkey('ctrl', 'v')  # Paste project name
     time.sleep(2)
