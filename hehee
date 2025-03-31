@@ -85,10 +85,17 @@ def search_and_open_project(project_name):
         print(f"Error locating or clicking on image: {e}")
     
     print(f"Project opened: {project_name}")
-    time.sleep(3)  # Wait for project to open   
-    capcut_window = gw.getWindowsWithTitle("CapCut")[0]
-    capcut_window.activate()
-    capcut_window.maximize()
+    time.sleep(5)  # Wait for project to open   
+    while True:
+        capcut_window = gw.getWindowsWithTitle("CapCut")[0]
+        if capcut_window.isMinimized:
+            capcut_window.activate()
+            capcut_window.maximize()
+        capcut_window = gw.getWindowsWithTitle("CapCut")[0]
+        if capcut_window.isMaximized:
+            break
+        else:
+            continue
     time.sleep(3)  # Wait for project to open
     return True
 
