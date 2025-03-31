@@ -51,15 +51,19 @@ def launch_capcut(capcut_path=None):
     time.sleep(1)
     pyautogui.press('enter')
     time.sleep(5)  # Wait for CapCut to open
+
+dem = 0
 def search_and_open_project(project_name):
+    global dem
     """Search for a project by name and open it"""
     print(f"Searching for project: {project_name}")
     
     # Click on search icon
-    try:
+    if dem == 0:
         search_img = pyautogui.locateCenterOnScreen('assets/search.png', confidence=0.7)
         pyautogui.click(search_img)
-    except Exception:
+        dem += 1
+    else:
         try:
             search_img = pyautogui.locateCenterOnScreen('assets/cancel_search.png', confidence=0.7)
             if search_img:
