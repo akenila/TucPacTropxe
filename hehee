@@ -59,8 +59,16 @@ def search_and_open_project(project_name):
         search_img = pyautogui.locateCenterOnScreen('assets/search.png', confidence=0.7)
         pyautogui.click(search_img)
     except Exception:
-        screen_width, screen_height = pyautogui.size()
-        project = pyautogui.click(screen_width * 0.87, screen_height * 0.23)
+        try:
+            search_img = pyautogui.locateCenterOnScreen('assets/cancel_search.png', confidence=0.7)
+            if search_img:
+                # Tính toán vị trí mới
+                new_x = center.x-100
+                new_y = center.y 
+                # Click vào vị trí mới
+                pyautogui.click(new_x, new_y)
+        except Exception:
+            print("Could not find search icon")
     
     # Type project name
     time.sleep(1)
