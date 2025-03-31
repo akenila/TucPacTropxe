@@ -1,4 +1,3 @@
-# Original functions
 def open_capcut():
     try:
         # Check if Capcut is already running
@@ -68,8 +67,8 @@ def search_and_open_project(project_name):
             search_img = pyautogui.locateCenterOnScreen('assets/cancel_search.png', confidence=0.7)
             if search_img:
                 # Tính toán vị trí mới
-                new_x = center.x-150
-                new_y = center.y 
+                new_x = search_img.x-150
+                new_y = search_img.y 
                 # Click vào vị trí mới
                 pyautogui.click(new_x, new_y)
             print("Clicked on cancel search icon")
