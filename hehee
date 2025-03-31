@@ -117,7 +117,17 @@ def export_project():
     
     
     screen_width, screen_height = pyautogui.size()
-    project = pyautogui.click(screen_width * 0.6, screen_height * 0.76)
+    try:
+        # Tìm vị trí trung tâm của ảnh
+        center = pyautogui.locateCenterOnScreen('assets/duration.png', confidence=0.7)
+        if center:
+            # Tính toán vị trí mới
+            new_x = center.x+450
+            new_y = center.y
+            # Click vào vị trí mới
+            pyautogui.moveTo(new_x, new_y)
+    except Exception as e:
+        pass
     time.sleep(2)  # Wait for export window to open
     print("Export started")
     
